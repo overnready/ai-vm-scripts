@@ -1,0 +1,26 @@
+# OS junk
+.DS_Store
+Thumbs.db
+
+# Credentials & keys
+*.pem
+*.key
+*.crt
+*.p12
+*.ovpn
+*.conf
+*.env
+*secrets*
+*password*
+*token*
+*.asc
+
+# Logs
+*.log
+*.out
+*.err
+
+# Temporary/backup files
+*.tmp
+*.bak
+*.swp
