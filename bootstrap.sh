@@ -1,29 +1,22 @@
-#!/bin/bash
+#!/usr/bin/env bash
 set -euo pipefail
 
-# 1. Update base system
-apt-get update -y
-apt-get install -y --no-install-recommends git ca-certificates
+# Which profile to run (set by Packer env: PROFILE=debian-headless, etc.)
+PROFILE="${PROFILE:-debian-headless}"
 
-# 2. Clone repo
-REPO_URL="https://github.com/youruser/vm-scripts.git"
-CLONE_DIR="/opt/vm-scripts"
-rm -rf "$CLONE_DIR"
-git clone "$REPO_URL" "$CLONE_DIR"
+# Assume Packer cloned repo to /opt/ai-vm-scripts; fall back to script’s own dir
+BASE_DIR="$(cd "$(dirname "$0")" && pwd)"
+REPO_DIR="${REPO_DIR:-/opt/ai-vm-scripts}"
+[ -d "$REPO_DIR" ] || REPO_DIR="$BASE_DIR"
 
-# 3. Detect profile
-PROFILE="${PROFILE:-default}"
-echo "Using profile: $PROFILE"
+PROFILE_SCRIPT="$REPO_DIR/profiles/${PROFILE}.sh"
 
-# 4. Run profile script
-cd "$CLONE_DIR/profiles"
-if [[ -x "$PROFILE.sh" ]]; then
-  echo "Running profile script: $PROFILE.sh"
-  bash "$PROFILE.sh"
-else
-  echo "ERROR: Profile $PROFILE.sh not found!"
+echo "[*] bootstrap: using repo dir: $REPO_DIR"
+echo "[*] bootstrap: profile: $PROFILE"
+
+if [[ ! -x "$PROFILE_SCRIPT" ]]; then
+  echo "ERROR: profile not found or not executable: $PROFILE_SCRIPT"
   exit 1
 fi
 
-# 5. Done
-echo "Bootstrap finished successfully!"
+exec bash "$PROFILE_SCRIPT"
